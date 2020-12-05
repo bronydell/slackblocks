@@ -3,7 +3,7 @@ from enum import Enum
 from json import dumps
 from typing import Any, Dict, List, Optional, Union
 from uuid import uuid4
-from .elements import Element, ElementType, Text, TextType
+from slackblocks.slackblocks.elements.base_elements import Element, ElementType, Text, TextType
 from .errors import InvalidUsageError
 
 
@@ -12,6 +12,7 @@ class BlockType(Enum):
     Convenience class for identifying the different types of blocks available
     in the Slack Blocks API and their programmatic names.
     """
+    INPUT = "input"
     SECTION = "section"
     DIVIDER = "divider"
     IMAGE = "image"
@@ -211,4 +212,34 @@ class HeaderBlock(Block):
     def _resolve(self) -> Dict[str, any]:
         header = self._attributes()
         header["text"] = self.text._resolve()
+        return header
+
+
+class InputBlock(Block):
+    """
+    A block that collects information from users - it can hold a plain-text input element,
+    a checkbox element, a radio button element, a select menu element, a multi-select menu element, or a datepicker.
+    """
+    def __init__(self,
+                 label: Union[str, Text],
+                 element: Element,
+                 dispatch_action: bool = False,
+                 hint: Optional[Union[str, Text]] = None,
+                 optional: bool = False,
+                 block_id: Optional[str] = None):
+        super().__init__(type_=BlockType.INPUT, block_id=block_id)
+        self.label = Text.to_text(label, force_plaintext=True, max_length=2000)
+        self.element = element
+        self.dispatch_action = dispatch_action
+        self.optional = optional
+        self.hint = Text.to_text(hint, force_plaintext=True, max_length=2000)
+
+    def _resolve(self) -> Dict[str, Any]:
+        header = self._attributes()
+        header["label"] = self.label._resolve()
+        header["element"] = self.element._resolve()
+        header["dispatch_action"] = self.dispatch_action
+        header["optional"] = self.optional
+        if self.hint:
+            header["hint"] = self.hint._resolve()
         return header

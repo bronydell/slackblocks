@@ -1,98 +1,6 @@
-from abc import ABC, abstractmethod
-from enum import Enum
-from json import dumps
 from typing import Any, Dict, Optional, Union
-from .errors import InvalidUsageError
 
-
-class ElementType(Enum):
-    """
-    Convenience class for referencing the various message elements Slack
-    provides.
-    """
-    TEXT = "text"
-    IMAGE = "image"
-    BUTTON = "button"
-    CONFIRM = "confirm"
-
-
-class TextType(Enum):
-    """
-    Allowable types for Slack Text objects.
-    N.B: some usages of Text objects only allow the plaintext variety.
-    """
-    MARKDOWN = "mrkdwn"
-    PLAINTEXT = "plain_text"
-
-
-class Element(ABC):
-    """
-    Basis element containing attributes and behaviour common to all elements.
-    N.B: Element is an abstract class and cannot be used directly.
-    """
-    def __init__(self, type_: ElementType):
-        super().__init__()
-        self.type = type_
-
-    def _attributes(self) -> Dict[str, Any]:
-        return {
-            "type": self.type.value
-        }
-
-    @abstractmethod
-    def _resolve(self) -> Dict[str, Any]:
-        pass
-
-
-class Text(Element):
-    """
-    An object containing some text, formatted either as plain_text or using
-    Slack's "mrkdwn"
-    """
-    def __init__(self,
-                 text: str,
-                 type_: TextType = TextType.MARKDOWN,
-                 emoji: bool = False,
-                 verbatim: bool = False):
-        super().__init__(type_=ElementType.TEXT)
-        self.text_type = type_
-        self.text = text
-        if self.text_type == TextType.MARKDOWN:
-            self.verbatim = verbatim
-            self.emoji = None
-        elif self.text_type == TextType.PLAINTEXT:
-            self.verbatim = None
-            self.emoji = emoji
-
-    def _resolve(self) -> Dict[str, Any]:
-        text = {
-            "type": self.text_type.value,
-            "text": self.text,
-        }
-        if self.text_type == TextType.MARKDOWN:
-            text["verbatim"] = self.verbatim
-        elif self.type == TextType.PLAINTEXT and self.emoji:
-            text["emoji"] = self.emoji
-        return text
-
-    @staticmethod
-    def to_text(text: Union[str, "Text"],
-                force_plaintext=False,
-                max_length: Optional[int] = None) -> "Text":
-        type_ = TextType.PLAINTEXT if force_plaintext else TextType.MARKDOWN
-        if type(text) is str:
-            if max_length and len(text) > max_length:
-                raise InvalidUsageError("Text length exceeds Slack-imposed limit")
-            return Text(text=text,
-                        type_=type_)
-        else:
-            if max_length and len(text) > max_length:
-                raise InvalidUsageError("Text length exceeds Slack-imposed limit")
-            return Text(text=text.text,
-                        type_=type_)
-
-    def __str__(self) -> str:
-        return dumps(self._resolve())
+from .base_elements import Text, Element, ElementType
 
 
 class Image(Element):
@@ -175,3 +83,57 @@ class Button(Element):
         if self.confirm:
             button["confirm"] = self.confirm._resolve()
         return button
+
+
+class DispatchActionConfig:
+    def __init__(self,
+                 on_character_entered: bool = False,
+                 on_enter_pressed: bool = False):
+        self.on_character_entered = on_character_entered
+        self.on_enter_pressed = on_enter_pressed
+
+    def _resolve(self) -> Dict[str, Any]:
+        actions = []
+        if self.on_character_entered:
+            actions.append("on_character_entered")
+        if self.on_enter_pressed:
+            actions.append("on_enter_pressed")
+
+        return {
+            "trigger_actions_on": actions
+        }
+
+
+class TextInput(Element):
+    def __init__(self,
+                 action_id: str,
+                 placeholder: Optional[Union[str, Text]] = None,
+                 initial_value: Optional[str] = None,
+                 multiline: bool = False,
+                 min_length: Optional[int] = None,
+                 max_length: Optional[int] = None,
+                 dispatch_config: Optional[DispatchActionConfig] = None):
+        super().__init__(ElementType.PLAIN_TEXT_INPUT)
+        self.action_id = action_id
+        self.placeholder = Text.to_text(placeholder, max_length=150, force_plaintext=True)
+        self.initial_value = initial_value
+        self.multiline = multiline
+        self.min_length = min_length
+        self.max_length = max_length
+        self.dispatch_config = dispatch_config
+
+    def _resolve(self) -> Dict[str, Any]:
+        inputfield = self._attributes()
+        inputfield["action_id"] = self.action_id
+        inputfield["multiline"] = self.multiline
+        if self.placeholder:
+            inputfield["placeholder"] = self.placeholder._resolve()
+        if self.initial_value:
+            inputfield["initial_value"] = self.initial_value
+        if self.min_length:
+            inputfield["min_length"] = self.min_length
+        if self.max_length:
+            inputfield["max_length"] = self.max_length
+        if self.dispatch_config:
+            inputfield["dispatch_action_config"] = self.dispatch_config._resolve()
+        return inputfield
