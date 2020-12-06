@@ -1,12 +1,12 @@
 from typing import List, Optional, Dict, Any
 
-from slackblocks.slackblocks.elements.base_elements import Element
+from slackblocks.slackblocks.blocks import Block
 from slackblocks.slackblocks.view.base_view import BaseSlackView, SlackViewType
 
 
 class HomeSlackView(BaseSlackView):
     def __init__(self,
-                 blocks: Optional[List[Element]] = None,
+                 blocks: Optional[List[Block]] = None,
                  private_metadata: Optional[Dict[str, Any]] = None,
                  callback_id: Optional[str] = None,
                  external_id: Optional[str] = None):

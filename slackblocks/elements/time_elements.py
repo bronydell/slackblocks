@@ -40,11 +40,12 @@ class DatePicker(Element):
         self.confirm = confirm
 
     def _resolve(self) -> Dict[str, Any]:
-        time_picker = self._attributes()
-        time_picker["placeholder"] = self.placeholder._resolve()
-        time_picker["action_id"] = self.action_id
+        date_picker = self._attributes()
+        date_picker["action_id"] = self.action_id
+        if self.placeholder:
+            date_picker["placeholder"] = self.placeholder._resolve()
         if self.initial_date:
-            time_picker["initial_date"] = self.initial_date.strftime("%Y-%m-%d")
+            date_picker["initial_date"] = self.initial_date.strftime("%Y-%m-%d")
         if self.confirm:
-            time_picker["confirm"] = self.confirm._resolve()
-        return time_picker
+            date_picker["confirm"] = self.confirm._resolve()
+        return date_picker

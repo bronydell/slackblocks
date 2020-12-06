@@ -23,6 +23,8 @@ class BaseSlackView(ABC):
                  private_metadata: Optional[Dict[str, Any]] = None,
                  callback_id: Optional[str] = None,
                  external_id: Optional[str] = None,):
+        if private_metadata is None:
+            private_metadata = dict()
         if blocks is None:
             blocks = list()
         self.type = view_type
