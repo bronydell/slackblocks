@@ -59,7 +59,7 @@ class SectionBlock(Block):
     def __init__(self,
                  text: Union[str, Text],
                  block_id: Optional[str] = None,
-                 fields: Optional[List[Text]] = None,
+                 fields: Optional[List[Union[str, Text]]] = None,
                  accessory: Optional[Element] = None):
         super().__init__(type_=BlockType.SECTION,
                          block_id=block_id)
@@ -67,7 +67,7 @@ class SectionBlock(Block):
             self.text = text
         else:
             self.text = Text(text)
-        self.fields = fields
+        self.fields = [Text.to_text(field, max_length=2000) for field in fields if field]
         self.accessory = accessory
 
     def _resolve(self) -> Dict[str, Any]:
