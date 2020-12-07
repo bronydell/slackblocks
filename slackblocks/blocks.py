@@ -57,22 +57,20 @@ class SectionBlock(Block):
     or side-by-side with any of the available block elements.
     """
     def __init__(self,
-                 text: Union[str, Text],
+                 text: Optional[Union[str, Text]],
                  block_id: Optional[str] = None,
                  fields: Optional[List[Union[str, Text]]] = None,
                  accessory: Optional[Element] = None):
         super().__init__(type_=BlockType.SECTION,
                          block_id=block_id)
-        if type(text) is Text:
-            self.text = text
-        else:
-            self.text = Text(text)
+        self.text = Text.to_text(text, max_length=2000)
         self.fields = [Text.to_text(field, max_length=2000) for field in fields if field]
         self.accessory = accessory
 
     def _resolve(self) -> Dict[str, Any]:
         section = self._attributes()
-        section["text"] = self.text._resolve()
+        if self.text:
+            section["text"] = self.text._resolve()
         if self.fields:
             section["fields"] = [field._resolve() for field in self.fields]
         if self.accessory:
