@@ -7,7 +7,7 @@ from slackblocks.slackblocks.view.modal_view import ModalSlackView
 
 class ModalResponseAction(Enum):
     ERROR = "errors"
-    CLOSE = "close"
+    CLOSE = "clear"
     UPDATE = "update"
 
 

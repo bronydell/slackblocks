@@ -64,7 +64,10 @@ class SectionBlock(Block):
         super().__init__(type_=BlockType.SECTION,
                          block_id=block_id)
         self.text = Text.to_text(text, max_length=2000)
-        self.fields = [Text.to_text(field, max_length=2000) for field in fields if field]
+        if not fields:
+            self.fields = None
+        else:
+            self.fields = [Text.to_text(field, max_length=2000) for field in fields if field]
         self.accessory = accessory
 
     def _resolve(self) -> Dict[str, Any]:
