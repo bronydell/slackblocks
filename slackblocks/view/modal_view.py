@@ -1,9 +1,7 @@
-from abc import ABC, abstractmethod
-from enum import Enum
 from typing import List, Optional, Dict, Any, Union
 
-from slackblocks.slackblocks.blocks import InputBlock
-from slackblocks.slackblocks.elements.base_elements import Element, Text
+from slackblocks.slackblocks.blocks import InputBlock, Block
+from slackblocks.slackblocks.elements.base_elements import Text
 from slackblocks.slackblocks.errors import InvalidUsageError
 from slackblocks.slackblocks.view.base_view import BaseSlackView, SlackViewType
 
@@ -13,7 +11,7 @@ class ModalSlackView(BaseSlackView):
                  title: Union[str, Text],
                  close: Optional[Union[str, Text]] = None,
                  submit: Optional[Union[str, Text]] = None,
-                 blocks: Optional[List[Element]] = None,
+                 blocks: Optional[List[Block]] = None,
                  private_metadata: Optional[Dict[str, Any]] = None,
                  clear_on_close: Optional[bool] = None,
                  notify_on_close: Optional[bool] = None,
