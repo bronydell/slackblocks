@@ -43,9 +43,9 @@ class StaticSelect(Element):
     def __init__(self,
                  action_id: str,
                  placeholder: Union[str, Text],
-                 options: Optional[List[Union[OptionObject]]] = None,
+                 options: Optional[List[OptionObject]] = None,
                  option_group: Optional[OptionGroup] = None,
-                 initial_option: Optional[str] = None,
+                 initial_option: Optional[OptionObject] = None,
                  confirm: Optional[Confirm] = None):
         super().__init__(ElementType.STATIC_SELECT)
         if not options and not option_group:

@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, time
 from typing import Any, Dict, Optional, Union
 from .base_elements import Element, ElementType, Text
 from .common_elements import Confirm
@@ -7,7 +7,7 @@ from .common_elements import Confirm
 class TimePicker(Element):
     def __init__(self,
                  action_id: str,
-                 initial_time: Optional[datetime] = None,
+                 initial_time: Optional[time] = None,
                  placeholder: Optional[Union[str, Text]] = None,
                  confirm: Optional[Confirm] = None):
         super().__init__(ElementType.TIME_PICKER)
